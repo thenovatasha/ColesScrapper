@@ -15,7 +15,6 @@ def retrieve_data(html_text):
     product_names, product_prices, product_links, product_codes = [], [],[],[]
     for tile in non_ads:
 
-        
         product_name = tile.find('h2', class_ = 'product__title').text.rstrip()
         try:
             product_price = tile.find('span', class_ = 'price__value').text
@@ -37,26 +36,37 @@ def retrieve_data(html_text):
     else: 
         return data
     
+# get categories links
+main_url = 'https://www.coles.com.au/browse'
+main_html = requests.get(main_url).text
+soup_categories = BeautifulSoup(main_html, "lxml")
+category_tiles = soup_categories.find_all("div", attrs={'data-testid': 'content-container'})
 
+category_links = []
+for tile in category_tiles:
+     category_link = tile.find("a", attr={"data-testid": "category-card"})
+     print(category_link)
+     #category_links.append(category_link) 
 page_num = 1
+print(category_links)
 data = []
-while True:
-    base_url = 'https://www.coles.com.au/on-special'
-    URL = base_url + '?page=' + f'{page_num}'
-    html_text = requests.get(URL)
-    print(page_num)
-    print(f'Response code is : {html_text.status_code}')
-    data_found = retrieve_data(html_text)
-    if html_text.status_code != 200 or data_found == 0:
-        break
-    data += data_found
-    page_num += 1
-    time.sleep(2)
-    
+# while True:
+#     base_url = 'https://www.coles.com.au/on-special'
+#     URL = base_url + '?page=' + f'{page_num}'
+#     html_text = requests.get(URL)
+#     print(page_num)
+#     print(f'Response code is : {html_text.status_code}')
+#     data_found = retrieve_data(html_text)
+#     if html_text.status_code != 200 or data_found == 0:
+#         break
+#     data += data_found
+#     page_num += 1
+#     time.sleep(2)
+#     
 
-with open('coles_data.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['Product Name', 'Product Price', 'Product Code', 'Product Link'])
-        writer.writerows(data)
+# with open('coles_data.csv', 'w', newline='') as f:
+#         writer = csv.writer(f)
+#         writer.writerow(['Product Name', 'Product Price', 'Product Code', 'Product Link'])
+#         writer.writerows(data)
 
-print("Done successfully.")        
+print("Done successfully.")
