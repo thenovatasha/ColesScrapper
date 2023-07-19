@@ -1,2 +1,2 @@
 # ColesScrapper
-Scarpe all product information in coles.au website
+Scrape all product related information from coles.au website
