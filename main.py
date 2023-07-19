@@ -47,9 +47,7 @@ for tile in category_tiles:
      category_link = tile.find("a", attrs={'data-testid': 'category-card'}).get('href')
      category_links.append(category_link)
 
-print(category_links)    
 
-print(category_links)
 data = []
 BASE_URL = 'https://www.coles.com.au'
 for category in category_links:
@@ -71,7 +69,7 @@ for category in category_links:
 
 with open('coles_data.csv', 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Product Name', 'Product Price', 'Product Code', 'Product Link'])
+        writer.writerow(['Product Name', 'Product Price', 'Product Code', 'Product Link', 'Category'])
         writer.writerows(data)
 
 print("Done successfully.")
