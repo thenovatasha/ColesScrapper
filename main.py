@@ -16,11 +16,16 @@ def retrieve_data(html, category_name):
     for tile in non_ads:
 
         product_name = tile.find('h2', class_ = 'product__title').text.rstrip()
-        # ignore tiles which do not have a price or are out of stock
+        # check and add tiles which do not have a price or are out of stock
         try:
             product_price = tile.find('span', class_ = 'price__value').text
         except AttributeError:
             print(f'Check {product_name}, {page_num}')
+            product_names.append(product_name)
+            product_prices.append('Out of Stock')
+            product_links.append('Out of Stock')
+            product_codes.append('Out of Stock')
+            category_names.append(category_name)
             continue
 
         product_link ='coles.com.au' + tile.find('a', class_ = 'product__link').get("href")
@@ -61,10 +66,12 @@ for category_link, category_name in category_links:
         
         URL = BASE_URL + category_link + '?page=' + f'{page_num}'
         html = requests.get(URL)
-        print(page_num)
-        print(category_name)
+        print(f'Currently scraping {page_num}, from {category_name}')
         print(f'Response code is : {html.status_code}')
         data_found = retrieve_data(html, category_name)
+        # Send to sleep for 2 minutes if 403 error.
+        if html.status_code == 403:
+            time.sleep(120)
         if html.status_code != 200 or data_found == 0:
             break
         data += data_found
