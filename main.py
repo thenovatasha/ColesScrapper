@@ -3,6 +3,20 @@ import requests
 import csv
 import time
 
+# Parse through each category links and category names and store in a list
+category_links = []
+main_url = 'https://www.coles.com.au/browse'
+main_html = requests.get(main_url).text
+soup_categories = BeautifulSoup(main_html, "lxml")
+category_tiles = soup_categories.find("ul", class_="sc-fc107670-0")
+
+for tile in category_tiles:
+     category_link = tile.find("a", attrs={'data-testid': 'category-card'}).get('href')
+     category_name = tile.find("a", attrs={'data-testid': 'category-card'}).get('aria-label')
+
+
+     category_links.append((category_link, category_name))
+
 def retrieve_data(html, category_name):
 
     html_text = html.text
@@ -43,21 +57,6 @@ def retrieve_data(html, category_name):
     else: 
         return data
     
-# get categories links
-main_url = 'https://www.coles.com.au/browse'
-main_html = requests.get(main_url).text
-soup_categories = BeautifulSoup(main_html, "lxml")
-category_tiles = soup_categories.find("ul", class_="sc-fc107670-0")
-
-category_links = []
-for tile in category_tiles:
-     category_link = tile.find("a", attrs={'data-testid': 'category-card'}).get('href')
-     category_name = tile.find("a", attrs={'data-testid': 'category-card'}).get('aria-label')
-
-
-     category_links.append((category_link, category_name))
-
-
 data = []
 BASE_URL = 'https://www.coles.com.au'
 for category_link, category_name in category_links:
@@ -66,14 +65,16 @@ for category_link, category_name in category_links:
         
         URL = BASE_URL + category_link + '?page=' + f'{page_num}'
         html = requests.get(URL)
+        # track progress and debug
         print(f'Currently scraping {page_num}, from {category_name}')
         print(f'Response code is : {html.status_code}')
         data_found = retrieve_data(html, category_name)
-        # Send to sleep for 2 minutes if 403 error.
+        # Send to sleep for 2 minutes to prevent access denial.
         if html.status_code == 403:
             time.sleep(120)
         if html.status_code != 200 or data_found == 0:
             break
+        
         data += data_found
         page_num += 1
         time.sleep(2)
@@ -85,3 +86,9 @@ with open('coles_data.csv', 'w', newline='') as f:
         writer.writerows(data)
 
 print("Done successfully.")
+
+# to do:
+# 1. refactor code into more reusable functions
+# 2. add more error handling
+# 3. add more comments
+# 4. add more data to be scraped (e.g. product description, product image, etc.)
